@@ -23,6 +23,12 @@ public class Demo {
 
         var note = session.find(Note.class, 2L);
         System.out.println(note);
+
+        session.close();
+
+        // Will throw and exception due to closed session
+        var anotherPerson = session.find(Person.class, 1L);
+        System.out.println(anotherPerson);
     }
 
     private static DataSource initializeDataSource() {

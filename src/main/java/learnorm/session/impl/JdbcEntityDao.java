@@ -18,12 +18,15 @@ import static learnorm.util.EntityUtil.*;
 @RequiredArgsConstructor
 public class JdbcEntityDao {
 
-    private final String SELECT_FROM_TABLE_BY_COLUMN = "SELECT * FROM %s where %s = ?;";
     private final DataSource dataSource;
     private Map<EntityKey<?>, Object> entityCache = new HashMap<>();
+    private boolean openStatus = true;
+
+    private final String SELECT_FROM_TABLE_BY_COLUMN = "SELECT * FROM %s where %s = ?;";
 
     @SneakyThrows
     public <T> T findById(Class<T> entityType, Object id) {
+        verifySessionIsOpened();
         var cachedEntity = entityCache.get(EntityKey.of(entityType, id));
         if (cachedEntity != null) return entityType.cast(cachedEntity);
         var idField = getIdField(entityType);
@@ -32,6 +35,7 @@ public class JdbcEntityDao {
 
     @SneakyThrows
     public <T> List<T> findAllBy(Class<T> entityType, Field field, Object columnValue) {
+        verifySessionIsOpened();
         var list = new ArrayList<T>();
         try (var connection = dataSource.getConnection()) {
             var tableName = resolveTableName(entityType);
@@ -80,5 +84,18 @@ public class JdbcEntityDao {
             entityCache.put(entityKey, entity);
             return entity;
         }
+    }
+
+    public void verifySessionIsOpened() {
+        if (!isOpened()) throw new RuntimeException("Session is closed");
+    }
+
+    public boolean isOpened() {
+        return openStatus;
+    }
+
+    public void close() {
+        entityCache.clear();
+        openStatus = false;
     }
 }
