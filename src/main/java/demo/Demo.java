@@ -4,7 +4,7 @@ import com.mysql.cj.jdbc.MysqlDataSource;
 import demo.entity.Note;
 import demo.entity.Person;
 import learnorm.session.SessionFactory;
-import learnorm.session.SessionFactoryImpl;
+import learnorm.session.impl.SessionFactoryImpl;
 
 import javax.sql.DataSource;
 
@@ -16,6 +16,10 @@ public class Demo {
 
         var person = session.find(Person.class, 1L);
         System.out.println(person);
+
+        // Should not execute the same SQL. First-level cache works.
+        var personCached = session.find(Person.class, 1L);
+        System.out.println(personCached);
 
         var note = session.find(Note.class, 2L);
         System.out.println(note);
