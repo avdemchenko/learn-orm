@@ -7,13 +7,15 @@ import lombok.SneakyThrows;
 import javax.sql.DataSource;
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
 import static learnorm.util.EntityUtil.*;
 
 @RequiredArgsConstructor
 public class JdbcEntityDao {
 
-    private final String SELECT_FROM_TABLE_BY_COLUMN = "SELECT * FROM %s where %s = ?";
+    private final String SELECT_FROM_TABLE_BY_COLUMN = "SELECT * FROM %s where %s = ?;";
     private final DataSource dataSource;
 
     @SneakyThrows
@@ -23,18 +25,30 @@ public class JdbcEntityDao {
     }
 
     @SneakyThrows
-    public <T> T findOneBy(Class<T> entityType, Field field, Object columnValue) {
+    public <T> List<T> findAllBy(Class<T> entityType, Field field, Object columnValue) {
+        var list = new ArrayList<T>();
         try (var connection = dataSource.getConnection()) {
             var tableName = resolveTableName(entityType);
             var columnName = resolveColumnName(field);
             var selectSql = String.format(SELECT_FROM_TABLE_BY_COLUMN, tableName, columnName);
             try (var statement = connection.prepareStatement(selectSql)) {
                 statement.setObject(1, columnValue);
+                System.out.println("SQL: " + statement);
                 var resultSet = statement.executeQuery();
-                resultSet.next();
-                return createEntityFromResultSet(entityType, resultSet);
+                while (resultSet.next()) {
+                    var entity = createEntityFromResultSet(entityType, resultSet);
+                    list.add(entity);
+                }
             }
         }
+        return list;
+    }
+
+    @SneakyThrows
+    public <T> T findOneBy(Class<T> entityType, Field field, Object columnValue) {
+        var result = findAllBy(entityType, field, columnValue);
+        if (result.size() > 1) throw new IllegalArgumentException("The result contains more than one record");
+        return result.get(0);
     }
 
     @SneakyThrows
