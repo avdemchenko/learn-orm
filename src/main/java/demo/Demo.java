@@ -1,6 +1,7 @@
 package demo;
 
 import com.mysql.cj.jdbc.MysqlDataSource;
+import demo.entity.Note;
 import demo.entity.Person;
 import learnorm.session.SessionFactory;
 import learnorm.session.SessionFactoryImpl;
@@ -15,6 +16,9 @@ public class Demo {
 
         var person = session.find(Person.class, 1L);
         System.out.println(person);
+
+        var note = session.find(Note.class, 2L);
+        System.out.println(note);
     }
 
     private static DataSource initializeDataSource() {
