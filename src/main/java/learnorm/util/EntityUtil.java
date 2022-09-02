@@ -3,6 +3,7 @@ package learnorm.util;
 import learnorm.annotation.Column;
 import learnorm.annotation.Id;
 import learnorm.annotation.Table;
+import lombok.SneakyThrows;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -29,5 +30,13 @@ public class EntityUtil {
                 .orElseThrow(() -> new RuntimeException(
                         "Field marked with @Id hasn't been found in class: " + entityType.getSimpleName())
                 );
+    }
+
+    @SneakyThrows
+    public static Object getId(Object entity) {
+        var entityType = entity.getClass();
+        var idField = getIdField(entityType);
+        idField.setAccessible(true);
+        return idField.get(entity);
     }
 }

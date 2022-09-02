@@ -1,5 +1,6 @@
-package learnorm.session;
+package learnorm.session.impl;
 
+import learnorm.session.impl.cache.EntityKey;
 import learnorm.util.EntityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -8,7 +9,9 @@ import javax.sql.DataSource;
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static learnorm.util.EntityUtil.*;
 
@@ -17,9 +20,12 @@ public class JdbcEntityDao {
 
     private final String SELECT_FROM_TABLE_BY_COLUMN = "SELECT * FROM %s where %s = ?;";
     private final DataSource dataSource;
+    private Map<EntityKey<?>, Object> entityCache = new HashMap<>();
 
     @SneakyThrows
     public <T> T findById(Class<T> entityType, Object id) {
+        var cachedEntity = entityCache.get(EntityKey.of(entityType, id));
+        if (cachedEntity != null) return entityType.cast(cachedEntity);
         var idField = getIdField(entityType);
         return findOneBy(entityType, idField, id);
     }
@@ -61,6 +67,18 @@ public class JdbcEntityDao {
             field.setAccessible(true);
             field.set(entity, columnValue);
         }
-        return entity;
+
+        return cache(entity);
+    }
+
+    private <T> T cache(T entity) {
+        var entityKey = EntityKey.valueOf(entity);
+        var cachedEntity = entityCache.get(entityKey);
+        if (cachedEntity != null) {
+            return (T) cachedEntity;
+        } else {
+            entityCache.put(entityKey, entity);
+            return entity;
+        }
     }
 }
