@@ -1,6 +1,7 @@
 package learnorm.session;
 
 import learnorm.session.cache.EntityKey;
+import learnorm.util.EntityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
@@ -68,10 +69,19 @@ public class JdbcEntityDao {
         var constructor = entityType.getConstructor();
         var entity = constructor.newInstance();
         for (Field field : entityType.getDeclaredFields()) {
-            var columnName = resolveColumnName(field);
-            var columnValue = resultSet.getObject(columnName);
             field.setAccessible(true);
-            field.set(entity, columnValue);
+            if (isRegularField(field)) {
+                var columnName = resolveColumnName(field);
+                var columnValue = resultSet.getObject(columnName);
+                field.set(entity, columnValue);
+            } else if (isEntityField(field)) {
+                var relatedEntityType = field.getType();
+                var joinColumnName = resolveColumnName(field);
+                var joinColumnValue = resultSet.getObject(joinColumnName);
+                var relatedEntityIdField = getIdField(relatedEntityType);
+                var relatedEntity = findOneBy(relatedEntityType, relatedEntityIdField, joinColumnValue);
+                field.set(entity, relatedEntity);
+            }
         }
 
         return cache(entity);

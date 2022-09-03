@@ -58,5 +58,11 @@ class BasicSelectIT {
         // and
         assertThat(note.getId()).isEqualTo(3);
         assertThat(note.getBody()).isEqualTo("Welcome to the party, pal");
+
+        // and
+        var personNote = note.getPerson();
+        assertThat(personNote.getId()).isEqualTo(1);
+        assertThat(personNote.getFirstName()).isEqualTo("John");
+        assertThat(personNote.getLastName()).isEqualTo("McClane");
     }
 }
