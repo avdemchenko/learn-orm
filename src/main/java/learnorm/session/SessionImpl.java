@@ -1,6 +1,5 @@
-package learnorm.session.impl;
+package learnorm.session;
 
-import learnorm.session.Session;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 

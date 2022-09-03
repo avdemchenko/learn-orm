@@ -1,4 +1,4 @@
-package demo.entity;
+package e2e.entity;
 
 import learnorm.annotation.Id;
 import learnorm.annotation.Table;

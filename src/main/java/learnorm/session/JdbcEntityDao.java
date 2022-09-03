@@ -1,7 +1,6 @@
-package learnorm.session.impl;
+package learnorm.session;
 
-import learnorm.session.impl.cache.EntityKey;
-import learnorm.util.EntityUtil;
+import learnorm.session.cache.EntityKey;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 

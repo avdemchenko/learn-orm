@@ -1,7 +1,5 @@
-package learnorm.session.impl;
+package learnorm.session;
 
-import learnorm.session.Session;
-import learnorm.session.SessionFactory;
 import lombok.RequiredArgsConstructor;
 
 import javax.sql.DataSource;
