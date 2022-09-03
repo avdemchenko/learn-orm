@@ -2,8 +2,8 @@ package e2e;
 
 import e2e.entity.Note;
 import e2e.entity.Person;
-import learnorm.session.SessionFactoryImpl;
 import learnorm.session.SessionFactory;
+import learnorm.session.SessionFactoryImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,9 +40,11 @@ class BasicSelectIT {
     public void shouldFindEntitiesById() {
         // given
         SessionFactory sessionFactory = new SessionFactoryImpl(dataSource);
-        var session = sessionFactory.openSession();
 
         // when
+        var session = sessionFactory.openSession();
+
+        // and
         var person = session.find(Person.class, 1L);
 
         // and

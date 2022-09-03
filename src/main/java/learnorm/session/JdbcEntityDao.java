@@ -3,6 +3,8 @@ package learnorm.session;
 import learnorm.session.cache.EntityKey;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Field;
@@ -14,6 +16,7 @@ import java.util.Map;
 
 import static learnorm.util.EntityUtil.*;
 
+@Log4j2
 @RequiredArgsConstructor
 public class JdbcEntityDao {
 
@@ -42,7 +45,7 @@ public class JdbcEntityDao {
             var selectSql = String.format(SELECT_FROM_TABLE_BY_COLUMN, tableName, columnName);
             try (var statement = connection.prepareStatement(selectSql)) {
                 statement.setObject(1, columnValue);
-                System.out.println("SQL: " + statement);
+                log.trace("SQL: {}", statement);
                 var resultSet = statement.executeQuery();
                 while (resultSet.next()) {
                     var entity = createEntityFromResultSet(entityType, resultSet);
