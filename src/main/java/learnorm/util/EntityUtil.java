@@ -1,8 +1,6 @@
 package learnorm.util;
 
-import learnorm.annotation.Column;
-import learnorm.annotation.Id;
-import learnorm.annotation.Table;
+import learnorm.annotation.*;
 import lombok.SneakyThrows;
 
 import java.lang.reflect.Field;
@@ -38,5 +36,17 @@ public class EntityUtil {
         var idField = getIdField(entityType);
         idField.setAccessible(true);
         return idField.get(entity);
+    }
+
+    public static boolean isRegularField(Field field) {
+        return !isEntityField(field) && !isEntityCollectionField(field);
+    }
+
+    public static boolean isEntityField(Field field) {
+        return field.isAnnotationPresent(ManyToOne.class);
+    }
+
+    public static boolean isEntityCollectionField(Field field) {
+        return field.isAnnotationPresent(OneToMany.class);
     }
 }
