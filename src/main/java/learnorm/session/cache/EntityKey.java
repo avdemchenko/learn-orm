@@ -1,4 +1,4 @@
-package learnorm.session.impl.cache;
+package learnorm.session.cache;
 
 import learnorm.util.EntityUtil;
 
