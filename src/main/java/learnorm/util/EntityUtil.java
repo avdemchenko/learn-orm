@@ -49,4 +49,11 @@ public class EntityUtil {
     public static boolean isEntityCollectionField(Field field) {
         return field.isAnnotationPresent(OneToMany.class);
     }
+
+    public static <T> Field getRelatedEntityField(Class<T> fromEntity, Class<?> toEntity) {
+        return Arrays.stream(toEntity.getDeclaredFields())
+                .filter(f -> f.getType().equals(fromEntity))
+                .findAny()
+                .orElseThrow(() -> new RuntimeException("Related field not found"));
+    }
 }

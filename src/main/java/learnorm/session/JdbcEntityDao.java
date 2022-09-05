@@ -5,10 +5,10 @@ import learnorm.util.EntityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
-import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -81,10 +81,24 @@ public class JdbcEntityDao {
                 var relatedEntityIdField = getIdField(relatedEntityType);
                 var relatedEntity = findOneBy(relatedEntityType, relatedEntityIdField, joinColumnValue);
                 field.set(entity, relatedEntity);
+            } else if (isEntityCollectionField(field)) {
+                var relatedEntityType = getEntityCollectionElementType(field);
+                var entityFieldInRelatedEntity = EntityUtil.getRelatedEntityField(entityType, relatedEntityType);
+                var entityId = getId(entity);
+                var list = new LazyList<T>(() -> findAllBy(relatedEntityType, entityFieldInRelatedEntity, entityId));
+                field.set(entity, list);
             }
         }
 
         return cache(entity);
+    }
+
+    private Class<?> getEntityCollectionElementType(Field field) {
+        var parametrizedType = (ParameterizedType) field.getGenericType();
+        var typeArguments = parametrizedType.getActualTypeArguments();
+        var actualTypeArguments = typeArguments[0];
+        var relatedEntityType = (Class<?>) actualTypeArguments;
+        return relatedEntityType;
     }
 
     private <T> T cache(T entity) {
